@@ -19,15 +19,35 @@ describe('Create product page', () => {
         it('should disable the save button', () => {
             expect(rendered.getByText('Save').disabled).toEqual(true);
         });
+
+        describe('user corrects the error', () => {
+            beforeEach(() => {
+                Simulate.change(rendered.getByLabelText('Price'), {target: {value: '12.25'}});
+            });
+
+            it('should not display a validation error', () => {
+                expect(rendered.getByTestId('validationErrors_price').textContent).toEqual('');
+            });
+    
+            it('should enable the save button', () => {
+                expect(rendered.getByText('Save').disabled).toEqual(false);
+            });
+        });
     });
 
     describe('User enters valid data and hits save', () => {
         let rendered;
+        let preventDefault;
 
         beforeEach(() => {
             rendered = render(<CreateProductPage/>);
+            preventDefault = jest.fn();
             Simulate.change(rendered.getByLabelText('Price'), {target: {value: '12.34'}});
-            Simulate.click(rendered.getByText('Save'));
+            Simulate.submit(rendered.container.querySelector('form'), {preventDefault});
+        });
+
+        it('should prevent the default submit', () => {
+            expect(preventDefault.mock.calls).not.toHaveLength(0);
         });
 
         it('should send a request to the /products url', () => {

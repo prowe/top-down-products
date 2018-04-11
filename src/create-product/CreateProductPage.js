@@ -22,15 +22,20 @@ class CreateProductPage extends Component {
             }));
             return;
         }
-        this.setState(({product}) => ({
+        this.setState(({product, validationErrors}) => ({
             product: {
                 ...product,
                 price
+            },
+            validationErrors: {
+                ...validationErrors,
+                price: null
             }
-        }))
+        }));
     }
 
-    onSubmit = () => {
+    onSubmit = (e) => {
+        e && e.preventDefault();
         fetch('/products', {
             method: 'POST',
             body: JSON.stringify(this.state.product)
@@ -39,14 +44,15 @@ class CreateProductPage extends Component {
 
     render() {
         const {validationErrors} = this.state;
-        const isSubmitDisabled = Object.keys(validationErrors).length > 0;
-        return <form>
+        const isSubmitDisabled = Object.values(validationErrors)
+            .some((error) => error);
+        return <form onSubmit={this.onSubmit}>
             <label>Price
                 <input onChange={this.onPriceChange}/>
                 <div data-testid='validationErrors_price'>{this.state.validationErrors.price}</div>
             </label>
 
-            <button disabled={isSubmitDisabled} onClick={this.onSubmit}>Save</button>
+            <button disabled={isSubmitDisabled} >Save</button>
         </form>;
     }
 }
